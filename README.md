@@ -1,4 +1,4 @@
-# README
+# frontend-lib-simplify
 
 本项目记录一些前端经典库源码简单实现，供学习使用
 
