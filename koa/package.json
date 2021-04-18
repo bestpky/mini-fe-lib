@@ -1,0 +1,11 @@
+{
+  "name": "my-koa",
+  "version": "1.0.0",
+  "description": "koa简单实现",
+  "scripts": {
+    "dev": "node test/example.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

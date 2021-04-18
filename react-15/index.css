@@ -1,0 +1,15 @@
+body {
+    font-family: Sans-Serif;
+    background: #fafafa;
+}
+
+button {
+    background: none;
+    box-shadow: none;
+    border: 1px solid #dd1224;
+    color: #dd1224;
+    cursor: pointer;
+    width: 60px;
+    outline: 0 !important;
+    margin: 5px 0;
+}
