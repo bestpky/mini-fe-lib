@@ -1,0 +1,48 @@
+Arguments: 
+  /Users/pky/.nvm/versions/node/v14.14.0/bin/node /Users/pky/.nvm/versions/node/v14.14.0/bin/yarn
+
+PATH: 
+  /Users/pky/.nvm/versions/node/v14.14.0/bin:/Users/pky/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pky/homebrew/bin
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  14.14.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/pky/frontend-lib-simplify/mobx/package.json: Unexpected token } in JSON at position 368
+      at JSON.parse (<anonymous>)
+      at /Users/pky/.nvm/versions/node/v14.14.0/lib/node_modules/yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/Users/pky/.nvm/versions/node/v14.14.0/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /Users/pky/.nvm/versions/node/v14.14.0/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "mobx",
+    "version": "1.0.0",
+    "description": "",
+    "main": "defineProperty-version.js",
+    "scripts": {
+      "compile": "babel src -d lib"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "@babel/cli": "^7.12.1",
+      "@babel/core": "^7.12.3",
+      "@babel/preset-env": "^7.12.1",
+      "@babel/preset-react": "^7.12.5",
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
