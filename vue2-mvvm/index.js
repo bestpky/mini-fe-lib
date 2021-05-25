@@ -1,14 +1,14 @@
 class Vue{
     constructor(options = {}){
         this.$el = document.querySelector(options.el);
-        let data = this.data = options.data; 
+        this.data = options.data; 
         // 代理data，使其能直接this.xxx的方式访问data，正常的话需要this.data.xxx
-        Object.keys(data).forEach((key)=> {
+        Object.keys(options.data).forEach((key)=> {
             this.proxyData(key);
         });
         this.methods = options.methods // 事件方法
         this.watcherTask = {}; // 需要监听的任务列表
-        this.observer(data); // 初始化劫持监听所有数据
+        this.observer(); // 初始化劫持监听所有数据
         this.compile(this.$el); // 解析dom
     }
     proxyData(key){
@@ -24,12 +24,12 @@ class Vue{
             }
         });
     }
-    observer(data){
+    observer(){
         let that = this
-        Object.keys(data).forEach(key=>{
-            let value = data[key]
+        Object.keys(this.data).forEach(key=>{
+            let value = this.data[key]
             this.watcherTask[key] = []
-            Object.defineProperty(data,key,{
+            Object.defineProperty(this.data,key,{
                 configurable: false,
                 enumerable: true,
                 get(){
@@ -50,8 +50,8 @@ class Vue{
         var nodes = el.childNodes;
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
-            console.log(node)
             if(node.nodeType === 3){
+                // 文本节点
                 var text = node.textContent.trim();
                 if (!text) continue;
                 this.compileText(node,'textContent')                
@@ -61,6 +61,7 @@ class Vue{
                 }
                 if(node.hasAttribute('v-model') && (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA')){
                     node.addEventListener('input',(()=>{
+                        // 这里用自执行是因为要先把data初始化到视图上
                         let attrVal = node.getAttribute('v-model')
                         this.watcherTask[attrVal].push(new Watcher(node,this,attrVal,'value'))
                         node.removeAttribute('v-model')
@@ -74,12 +75,11 @@ class Vue{
                     this.watcherTask[attrVal].push(new Watcher(node,this,attrVal,'innerHTML'))
                     node.removeAttribute('v-html')
                 }
-                this.compileText(node,'innerHTML')
                 if(node.hasAttribute('@click')){
                     let attrVal = node.getAttribute('@click')
                     node.removeAttribute('@click')
                     node.addEventListener('click',e => {
-                        this.methods[attrVal] && this.methods[attrVal].bind(this)()
+                        this.methods[attrVal] && this.methods[attrVal].call(this, e)
                     })
                 }
             }
@@ -92,15 +92,7 @@ class Vue{
                 value = value.trim()
                 let tpl = this.watcherTask[value] || []
                 tpl.push(new Watcher(node,this,value,type))
-                if(value.split('.').length > 1){
-                    let v = null
-                    value.split('.').forEach((val,i)=>{
-                        v = !v ? this[val] : v[val]
-                    })
-                    return v
-                }else{
-                    return this[value]
-                }
+                return this[value]
             })
         }
     }
@@ -112,9 +104,12 @@ class Watcher{
         this.vm = vm;
         this.value = value;
         this.type = type;
+        // 相当于mount的时候初始化
         this.update()
     }
-    update(){       
+    update(){ 
+        // 将data的某个key的值和视图的某个节点绑定，并提供更新方法    
+        // type描述如何更新节点，枚举为dom的属性或方法，如innerHtml等
         this.el[this.type] = this.vm.data[this.value]
     }
 }

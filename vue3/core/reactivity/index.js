@@ -77,7 +77,6 @@ function getDep(target, key) {
     dep = new Dep();
     depsMap[key] = dep;
   }
-  console.log(depsMap)
   return dep;
 }
 

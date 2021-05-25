@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vue MVVM</title>
+</head>
+<body>
+    <div id="app">
+        <div>
+            count: <span>{{count}}</span>
+            <button @click="addCount">count+1</button>
+        </div>
+        <br>
+        <div>
+            html: <span v-html="innerhtml"></p>
+        </div>
+        <br>
+        <div>
+            inputValue: <span>{{inputValue}} </span>
+            <br>
+            <input type="text" v-model="inputValue">
+        </div>
+
+        
+    </div>
+    <script src="./index.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data:{
+                count: 1,
+                innerhtml: '<strong>我是粗体</strong>',
+                inputValue: '改这里',
+            },
+            methods:{
+                addCount(e) {
+                    console.log(e, this)
+                    this.count++
+                },
+            }
+        })
+    </script>
+</body>
+</html>
