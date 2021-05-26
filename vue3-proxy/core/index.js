@@ -8,18 +8,18 @@ export function createApp(rootComponent) {
       let prevSubTree;
 
       effectWatch(() => {
+        const subTree = rootComponent.render(context);
         if (!isMounted) {
           isMounted = true
           rootContainer.innerHTML = ``;
-          const subTree = rootComponent.render(context);
           mountElement(subTree, rootContainer);
           prevSubTree = subTree;
 
         } else {
-          const subTree = rootComponent.render(context);
           diff(prevSubTree, subTree);
           prevSubTree = subTree;
         }
+
       });
     },
   };
