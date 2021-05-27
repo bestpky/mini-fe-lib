@@ -9,7 +9,6 @@ export function createApp(rootComponent) {
 
       effectWatch(() => {
         if (!isMounted) {
-          // init
           isMounted = true
           rootContainer.innerHTML = ``;
           const subTree = rootComponent.render(context);
@@ -17,15 +16,10 @@ export function createApp(rootComponent) {
           prevSubTree = subTree;
 
         } else {
-          // update
           const subTree = rootComponent.render(context);
           diff(prevSubTree, subTree);
           prevSubTree = subTree;
         }
-
-        // diff
-        // newVnode oldVnode
-        // rootContainer.append(element);
       });
     },
   };

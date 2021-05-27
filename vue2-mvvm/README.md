@@ -1,4 +1,6 @@
-# Vue2 MVVM 架构简单实现
+# Vue2 MVVM
+
+## 实现思路
 
 不涉及虚拟dom和diff算法，在实例化Vue时做这几件事:
 

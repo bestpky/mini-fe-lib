@@ -1,10 +1,8 @@
 // 响应式库
-
-// 依赖
+// 依赖：全局变量，连接Dep实例和effectWatch的桥梁
 let currentEffect;
 class Dep {
   constructor(val) {
-    // es6+
     this.effects = new Set();
     this._val = val;
   }
@@ -27,11 +25,16 @@ class Dep {
 
   // 2. 触发依赖
   notice() {
-    // 触发一下我们之前收集到的依赖
     this.effects.forEach((effect) => {
       effect();
     });
   }
+}
+
+// TODO: 只支持基本类型，不支持Object
+export function ref(v) {
+  const dep = new Dep(v)
+  return dep
 }
 
 export function effectWatch(effect) {
@@ -41,28 +44,6 @@ export function effectWatch(effect) {
   currentEffect = null;
 }
 
-// ref -> 很像了
-// const dep = new Dep(10);
-
-// let b;
-
-// effectWatch(() => {
-//   b = dep.value + 10;
-//   console.log(b);
-// });
-// // 值发生变更
-// dep.value = 20;
-
-// reactive
-// dep -> number  string
-// object  -> key -> dep
-
-// 1. 这个对象在什么时候改变的
-// object.a -> get
-// object.a = 2 -> set
-
-// vue2
-// proxy
 const targetMap = new Map();
 
 function getDep(target, key) {
@@ -80,16 +61,25 @@ function getDep(target, key) {
   return dep;
 }
 
+// 递归代理，比起Object.defindProperty的好处：
+// 1. 天然支持数组下标和方法，无需hack
+// 2. 无需遍历属性
 export function reactive(raw) {
+  if (typeof raw === 'object') {
+		for (let key in raw) {
+			if (typeof raw[key] === 'object') {
+				raw[key] = reactive(raw[key]);
+			}
+		}
+	}
   return new Proxy(raw, {
     get(target, key) {
-      // key - dep
-      // dep 存储在哪里
-      const dep = getDep(target, key);
-
       // 依赖收集
-      dep.depend();
-
+      const dep = getDep(target, key);
+      if (dep instanceof Dep) {
+        // 数组的constructor不是Dep
+        dep.depend();
+      }
       return Reflect.get(target, key);
     },
     set(target, key, value) {
