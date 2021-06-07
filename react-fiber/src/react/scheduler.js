@@ -1,24 +1,24 @@
-import {commitRoot} from './renderer'
-import {performUnitOfWork} from './reconciler'
+import { commitRoot } from './renderer'
+import { performUnitOfWork } from './reconciler'
 
 /**--------------------------任务调度--------------------------- */
 // 调度器:调度任务的优先级，高优任务优先进入Reconciler
 let nextUnitOfWork = null // 下一个任务单元，指fiber节点，用于记录中断前执行到哪个节点
-export let workInProgressRoot = null // 保存当前进度的树，用于commit
-export let currentRoot = null // 记录上一次commit后的根节点
+export let workInProgressRoot = null // 正在构建中的fiber根节点，包含整个链表结构
+export let currentRoot = null // 当前显示的fiber根节点，包含整个链表结构
 export let deletions = null // 这次更新要删除的节点
 
 export function setNextUnitOfWork(v) {
-  nextUnitOfWork = v
+    nextUnitOfWork = v
 }
 export function setWorkInProgressRoot(v) {
-  workInProgressRoot = v
+    workInProgressRoot = v
 }
 export function setCurrentRoot(v) {
-  currentRoot = v
+    currentRoot = v
 }
 export function setDeletions(v) {
-  deletions = v
+    deletions = v
 }
 
 /**

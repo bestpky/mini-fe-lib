@@ -1,9 +1,9 @@
 // 声明编译指示
-/** @jsx DiyReact.createElement */
+/** @jsx createElement */
 
-import DiyReact from './react'
+import { Component, transfer, createElement } from './react'
 
-class Count4 extends DiyReact.Component {
+class Counter extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -28,5 +28,4 @@ class Count4 extends DiyReact.Component {
     }
 }
 
-// export的时候用transfer包装下
-export default DiyReact.transfer(Count4)
+export default transfer(Counter)

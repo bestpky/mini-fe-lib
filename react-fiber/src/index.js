@@ -1,81 +1,13 @@
-// 声明编译指示
-/** @jsx DiyReact.createElement */
+/** @jsx createElement */
+import { render } from './react-dom'
+import { createElement } from './react'
 
-import DiyReact from './react'
-// import Count4 from './app'
+import CounterClass from './counter-class'
+import CounterFunc from './counter-func'
+import { List } from './list'
 
-// function Count3() {
-//     const [count, setCount] = DiyReact.useState(1)
-
-//     const onClickHandler = () => {
-//         setCount(count + 1)
-//     }
-
-//     return (
-//         <div>
-//             <h3>Count: {count}</h3>
-//             <button onClick={onClickHandler}>Count+1</button>
-//         </div>
-//     )
-// }
-
-// function Count() {
-//     const [count, setCount] = DiyReact.useState(1)
-//     const [count2, setCount2] = DiyReact.useState(1)
-
-//     const onClickHandler = () => {
-//         setCount(count + 1)
-//     }
-
-//     const onClickHandler2 = () => {
-//         setCount2(count2 + 1)
-//     }
-
-//     return (
-//         <div>
-//             <h3>Count1: {count}</h3>
-//             <button onClick={onClickHandler}>Count1+1</button>
-//             <h3>Count2: {count2}</h3>
-//             <button onClick={onClickHandler2}>Count2+1</button>
-//         </div>
-//     )
-// }
-
-function ArrFunc(props) {
-    return [
-        <h2>
-            {props.title}
-        </h2>,
-        <h3>h3</h3>
-    ]
+function SimpleDiv() {
+    return <div>简单的div</div>
 }
 
-function App(props) {
-    return (
-        <div>
-            <ArrFunc {...props}/>
-        </div>
-    )
-}
-
-// function App(props) {
-//     return (
-//         <div>
-//             <h1 id="title">{props.title}</h1>
-//             <hr></hr>
-//             <section>
-//                 <h2>函数组件1</h2>
-//                 <Count></Count>
-//                 {/* <hr></hr>
-//                 <h2>函数组件2</h2>
-//                 <Count3></Count3>
-//                 <hr></hr>
-//                 <h2>Class组件</h2>
-//                 <Count4></Count4> */}
-//             </section>
-//         </div>
-//     )
-// }
-
-
-DiyReact.render(<App title="Fiber Demo" />, document.getElementById('root'))
+render(<List />, document.getElementById('root'))
