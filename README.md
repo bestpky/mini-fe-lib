@@ -1,4 +1,4 @@
-# Front-end technology simply implementation
+# mini-fe-lib
 
 本仓库记录了一些前端技术的简单实现，尽可能按照源码的思路
 
@@ -11,6 +11,7 @@
 - [x] vue3 proxy
 - [x] webpack
 - [x] koa
+- [x] vite
 
 每个目录有一个README，描述其实现思路；
 代码写了一些注释增强可读性
