@@ -1,5 +1,7 @@
 # react-fiber 简单实现
 
+react fiber 架构是我见过的最巧妙也是最难的架构，简直 yyds
+
 ## 测试
 
 ```shell
@@ -20,7 +22,7 @@ yarn run webpack
 `currentRoot` 记录上一次 commit 后的根节点
 `deletions` 这次更新要删除的节点
 
-### 对Class组件的处理
+### 对 Class 组件的处理
 
 转成函数组件
 

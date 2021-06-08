@@ -33,44 +33,39 @@ export function createDom(vDom, isUpdate) {
 // 更新DOM的操作
 export function updateDom(dom, prevProps, nextProps) {
     // 处理props
-    Object.keys(prevProps)
-        .forEach(name => {
-            // 老的存在，新的没了，取消
-            if (name !== 'children' && !Object.hasOwnProperty.call(nextProps, name)) {
-                if (name.indexOf('on') === 0) {
-                    dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
-                } else {
-                    dom.removeAttribute(name)
-                }
-
+    Object.keys(prevProps).forEach(name => {
+        // 老的存在，新的没了，取消
+        if (name !== 'children' && !Object.hasOwnProperty.call(nextProps, name)) {
+            if (name.indexOf('on') === 0) {
+                dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
+            } else {
+                dom.removeAttribute(name)
             }
-        })
-    Object.keys(nextProps)
-        .forEach(name => {
-            if (name !== 'children') { 
-                // 新的存在，老的没有，新增
-                if (name.indexOf('on') === 0) {
-                    // 要先移除，否则事件方法会执行多次
-                    dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
-                    dom.addEventListener(name.substr(2).toLowerCase(), nextProps[name], false)
-                } else {
-                    if (dom[name] !== nextProps[name]) {
-                        console.log(dom, name, nextProps)
-                        // dom.setAttribute(name, nextProps[name])
-                        dom[name] = nextProps[name]
-                    }
+        }
+    })
+    Object.keys(nextProps).forEach(name => {
+        if (name !== 'children') {
+            // 新的存在，老的没有，新增
+            if (name.indexOf('on') === 0) {
+                // 要先移除，否则事件方法会执行多次
+                dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
+                dom.addEventListener(name.substr(2).toLowerCase(), nextProps[name], false)
+            } else {
+                if (dom[name] !== nextProps[name]) {
+                    // dom.setAttribute(name, nextProps[name])
+                    dom[name] = nextProps[name]
                 }
-
             }
-        })
+        }
+    })
     // 处理children，需要传key
-    const {children: oldChildren} = prevProps
-    const {children: newChildren} = nextProps
+    const { children: oldChildren } = prevProps
+    const { children: newChildren } = nextProps
     newChildren.forEach((newChild, index) => {
         if (oldChildren.findIndex(oldChild => oldChild.props.key === newChild.props.key) !== index) {
             if (!oldChildren[index]) {
                 dom.appendChild(createDom(newChild, true))
-            }else {
+            } else {
                 dom.replaceChild(createDom(newChild, true), dom.childNodes[index])
             }
         }
@@ -82,5 +77,4 @@ export function updateDom(dom, prevProps, nextProps) {
             }
         }
     })
-
 }

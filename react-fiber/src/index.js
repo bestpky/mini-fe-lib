@@ -10,4 +10,4 @@ function SimpleDiv() {
     return <div>简单的div</div>
 }
 
-render(<List />, document.getElementById('root'))
+render(<CounterClass />, document.getElementById('root'))
