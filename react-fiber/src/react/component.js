@@ -6,6 +6,7 @@ export class Component {
   }
 }
 
+// 转成函数组件
 export function transfer(Component) {
   return function (props) {
       const component = new Component(props)

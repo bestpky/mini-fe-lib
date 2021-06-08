@@ -2,12 +2,15 @@ import { createDom } from '../react-dom/dom-operation'
 import { setWipFiber, setHookIndex } from './use-state'
 import { deletions } from './scheduler'
 
+/**--------------------------reconciler阶段--------------------------- */
+
 /**
  * fiber结构
  *
  * 描述节点:
+ * type: 函数组件是自身，原生元素是tagName
  * props: {
- *      type: 标签名,
+ *      [属性名: string]: 属性值,
  *      children: 子节点
  * }
  * dom 真实dom
@@ -20,17 +23,21 @@ import { deletions } from './scheduler'
  *
  * 工作单元：
  * alternate 旧fiber
- * effectTag dom操作类型 REPLACEMENT | DELETION | UPDATE
+ * effectTag dom操作类型 MOUNT | DELETION | UPDATE
  */
 
-/**--------------------------reconciler阶段--------------------------- */
 
-// performUnitOfWork用来执行任务，参数是我们的当前fiber任务，返回值是下一个任务
-// 下一个任务就是下一个fiber节点，会按深度优先的算法找到这个节点
-// 深度优先：fiber.child > fiber.sibling > fiber.return
+/**
+ * 执行当前fiber节点的任务
+ * @param {object} fiber 当前fiber任务
+ * @returns 下一个任务,指当前fiber关联的下个节点，会按深度优先的算法找到这个节点
+ * 深度优先：fiber.child > fiber.sibling > fiber.return
+ */
 export function performUnitOfWork(fiber) {
+    // 函数组件的type是它自身，这是编译jsx的结果
     const isFunctionComponent = fiber.type instanceof Function
-    // 更新fiber结构，也就是diff过程
+    // 判断函数组件和原生元素，对fiber进行处理
+    // 简单地说就是给子elements转成fiber，并添加上child、retrun、sibling属性
     if (isFunctionComponent) {
         updateFunctionComponent(fiber)
     } else {
@@ -53,6 +60,7 @@ export function performUnitOfWork(fiber) {
     }
 }
 
+// 实际上包含mount和update两个阶段
 function updateFunctionComponent(fiber) {
     // 支持useState，初始化变量
     fiber.hooks = [] // hooks用来存储具体的state序列
@@ -61,99 +69,103 @@ function updateFunctionComponent(fiber) {
 
     // 函数组件的type就是个函数，直接拿来执行可以获得DOM元素
     const returnContent = fiber.type(fiber.props)
+    // 支持返回数组
     const elements = Array.isArray(returnContent) ? [...returnContent] : [returnContent]
     reconcileChildren(fiber, elements)
 }
 
+// 原生元素
 function updateHostComponent(fiber) {
+    // 首次没有dom
     if (!fiber.dom) {
+        // 直接在这里创建dom了，理论上不应该在reconcile阶段操作dom
         fiber.dom = createDom(fiber)
     }
-
-    // 类组件
+    // 子元素
     const elements = fiber.props && fiber.props.children
-
     reconcileChildren(fiber, elements)
 }
 
 /**
- * diff算法
- * @param {object} workInProgressFiber
- * @param {object} elements
+ * 协调器：
+ * 1. 处理节点关系：child、sibling、return，为了深度优先遍历使用
+ * 2. 打上操作标记，供commit使用
+ * @param {object} parentWipFiber 父fiber
+ * @param {array} elements 子elements
  */
-function reconcileChildren(workInProgressFiber, elements) {
-    // 构建fiber结构
-    let oldFiber = workInProgressFiber.alternate && workInProgressFiber.alternate.child // 获取上次的fiber树
+function reconcileChildren(parentWipFiber, elements) {
+    // 获取上次的fiber树
+    let oldFiber = parentWipFiber.alternate && parentWipFiber.alternate.child 
+    // 保存上一个兄弟节点，用于通过sibling连接这一个节点
     let prevSibling = null
     let index = 0
     if (elements && elements.length) {
-        // 第一次没有oldFiber，那全部是REPLACEMENT
+        // 没有oldFiber就是mount
         if (!oldFiber) {
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i]
-                const newFiber = buildNewFiber(element, workInProgressFiber)
-
-                // 父级的child指向第一个子元素
+                // element转fiber，添加return
+                const newFiber = createFiber(element, parentWipFiber)
+                // 添加child和sibling
                 if (i === 0) {
-                    workInProgressFiber.child = newFiber
+                    parentWipFiber.child = newFiber
                 } else {
-                    // 每个子元素拥有指向下一个子元素的指针
                     prevSibling.sibling = newFiber
                 }
-
                 prevSibling = newFiber
             }
-        }
+        } 
+        // update
         while (index < elements.length && oldFiber) {
             let element = elements[index]
             // 根据element算出新的fiber
             let newFiber = null
-
-            // 对比oldFiber和当前element
-            const sameType = oldFiber && element && oldFiber.type === element.type //检测类型是不是一样
-            // 先比较元素类型
+            // 对比oldFiber和当前element的类型
+            const sameType = oldFiber && element && oldFiber.type === element.type 
             if (sameType) {
-                // 如果类型一样，复用节点，更新props
                 newFiber = {
                     type: oldFiber.type,
                     props: element.props,
                     dom: oldFiber.dom,
-                    return: workInProgressFiber,
+                    return: parentWipFiber,
                     alternate: oldFiber, // 记录下上次状态
                     effectTag: 'UPDATE' // 添加一个操作标记
                 }
-            } else if (!sameType && element) {
-                // 如果类型不一样，有新的节点，创建新节点替换老节点
-                newFiber = buildNewFiber(element, workInProgressFiber)
-            } else if (!sameType && oldFiber) {
-                // 如果类型不一样，没有新节点，有老节点，删除老节点
-                oldFiber.effectTag = 'DELETION' // 添加删除标记
-                deletions.push(oldFiber) // 一个数组收集所有需要删除的节点
-            }
-
-            oldFiber = oldFiber.sibling // 循环处理兄弟元素
-
-            // 父级的child指向第一个子元素
-            if (index === 0) {
-                workInProgressFiber.child = newFiber
             } else {
-                // 每个子元素拥有指向下一个子元素的指针
+                if (element) {
+                    // 如果类型不一样，有新的节点，创建新节点替换老节点
+                    newFiber = createFiber(element, parentWipFiber)
+                } 
+                if (oldFiber) {
+                    // 如果类型不一样，没有新节点，有老节点，删除老节点
+                    oldFiber.effectTag = 'DELETION'
+                    // 全局收集所有需要删除的节点
+                    deletions.push(oldFiber)
+                }
+            }
+            // 循环处理兄弟元素
+            console.log(oldFiber)
+            oldFiber = oldFiber.sibling
+            // 添加child和sibling
+            if (index === 0) {
+                parentWipFiber.child = newFiber
+            } else {
                 prevSibling.sibling = newFiber
             }
-
             prevSibling = newFiber
             index++
         }
+        
     }
 }
 
-function buildNewFiber(fiber, workInProgressFiber) {
+function createFiber(element, parentWipFiber) {
     return {
-        type: fiber.type,
-        props: fiber.props,
+        type: element.type,
+        props: element.props,
         dom: null, // 构建fiber时没有dom，下次perform这个节点是才创建dom
-        return: workInProgressFiber,
+        return: parentWipFiber,
         alternate: null, // 新增的没有老状态
-        effectTag: 'REPLACEMENT' // 添加一个操作标记
+        effectTag: 'MOUNT'
     }
 }

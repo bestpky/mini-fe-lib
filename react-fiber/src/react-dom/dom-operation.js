@@ -22,7 +22,6 @@ export function createDom(vDom, isUpdate) {
                             dom.appendChild(createDom(c))
                         })
                     }
-                    console.log(item, vDom.props[item], dom)
                 }
             })
         }
@@ -33,35 +32,55 @@ export function createDom(vDom, isUpdate) {
 
 // 更新DOM的操作
 export function updateDom(dom, prevProps, nextProps) {
-    // 老的存在，新的没了，取消
+    // 处理props
     Object.keys(prevProps)
-        .filter(name => name !== 'children')
-        .filter(name => !(name in nextProps))
         .forEach(name => {
-            if (name.indexOf('on') === 0) {
-                dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
-            } else {
-                dom[name] = ''
+            // 老的存在，新的没了，取消
+            if (name !== 'children' && !Object.hasOwnProperty.call(nextProps, name)) {
+                if (name.indexOf('on') === 0) {
+                    dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
+                } else {
+                    dom.removeAttribute(name)
+                }
+
             }
         })
-    // 新的存在，老的没有，新增
     Object.keys(nextProps)
-        .filter(name => name !== 'children')
         .forEach(name => {
-            if (name.indexOf('on') === 0) {
-                dom.addEventListener(name.substr(2).toLowerCase(), nextProps[name], false)
-            } else {
-                dom[name] = nextProps[name]
+            if (name !== 'children') { 
+                // 新的存在，老的没有，新增
+                if (name.indexOf('on') === 0) {
+                    // 要先移除，否则事件方法会执行多次
+                    dom.removeEventListener(name.substr(2).toLowerCase(), prevProps[name], false)
+                    dom.addEventListener(name.substr(2).toLowerCase(), nextProps[name], false)
+                } else {
+                    if (dom[name] !== nextProps[name]) {
+                        console.log(dom, name, nextProps)
+                        // dom.setAttribute(name, nextProps[name])
+                        dom[name] = nextProps[name]
+                    }
+                }
+
             }
         })
-    // 子节点数量不一致的情况
-    if (prevProps.children.length !== nextProps.children.length) {
-        // 已新的为准，重新渲染全部子节点
-        dom.innerHTML = ''
-        nextProps.children.forEach(child => {
-            const childDom = createDom(child, true)
-            console.log(child, childDom)
-            dom.appendChild(childDom)
-        })
-    }
+    // 处理children，需要传key
+    const {children: oldChildren} = prevProps
+    const {children: newChildren} = nextProps
+    newChildren.forEach((newChild, index) => {
+        if (oldChildren.findIndex(oldChild => oldChild.props.key === newChild.props.key) !== index) {
+            if (!oldChildren[index]) {
+                dom.appendChild(createDom(newChild, true))
+            }else {
+                dom.replaceChild(createDom(newChild, true), dom.childNodes[index])
+            }
+        }
+    })
+    oldChildren.forEach((oldChild, index) => {
+        if (newChildren.findIndex(newChild => newChild.props.key === oldChild.props.key) !== index) {
+            if (!newChildren[index]) {
+                dom.removeChild(dom.childNodes[index])
+            }
+        }
+    })
+
 }

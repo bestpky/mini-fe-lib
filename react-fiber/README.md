@@ -20,6 +20,10 @@ yarn run webpack
 `currentRoot` 记录上一次 commit 后的根节点
 `deletions` 这次更新要删除的节点
 
+### 对Class组件的处理
+
+转成函数组件
+
 ### scheduler（调度器）
 
 首先会调用`requestIdleCallback`开启无限循环，每次循环会做两件事：
@@ -43,5 +47,6 @@ workInProgressFiber.alternate === currentFiber
 
 ### renderer（渲染器）
 
-操作类型：REPLACEMENT | UPDATE | DELETION
-其中标签名一样 UPDATE，不一样和第一次 mount 都是操作类型：REPLACEMENT
+操作类型：MOUNT | UPDATE | DELETION
+
+### useState

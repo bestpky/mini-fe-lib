@@ -23,7 +23,7 @@ function commitRootImpl(fiber) {
         parentFiber = parentFiber.return
     }
     const parentDom = parentFiber.dom
-    if (fiber.effectTag === 'REPLACEMENT' && fiber.dom) {
+    if (fiber.effectTag === 'MOUNT' && fiber.dom) {
         parentDom.appendChild(fiber.dom)
     } else if (fiber.effectTag === 'DELETION') {
         commitDeletion(fiber, parentDom)

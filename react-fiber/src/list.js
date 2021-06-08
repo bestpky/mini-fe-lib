@@ -13,9 +13,15 @@ export function List() {
         temp.pop()
         setList(temp)
     }
+    function set2Li() {
+        const temp = [...list]
+        temp.splice(1,1,'fuck')
+        setList(temp)
+    }
     return [
         <button onClick={push}>push</button>,
         <button onClick={pop}>pop</button>,
+        <button onClick={set2Li}>改第二个</button>,
         <ul>
             {list.map(item => (
                 <li key={item}>{item}</li>

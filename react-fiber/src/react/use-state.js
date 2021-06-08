@@ -12,7 +12,13 @@ export function setWipFiber(v) {
 export function setHookIndex(v) {
   hookIndex = v
 }
-
+/**
+ * useState 的逻辑分两块：
+ * 1、初始化：从fiber的alternate拿到旧的state，没用就用init值
+ * 2、提供setState方法，
+ * @param {any} init 初始值
+ * @returns [state, setState]
+ */
 export function useState(init) {
     // 取出上次的Hook
     const oldHook = wipFiber.alternate && wipFiber.alternate.hooks && wipFiber.alternate.hooks[hookIndex]
