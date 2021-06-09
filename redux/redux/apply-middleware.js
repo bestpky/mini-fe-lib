@@ -1,20 +1,20 @@
+/**
+ * 应用中间件：重写createStore的dispatch方法
+ * @param  {...any} middlewares 
+ * @returns {function}
+ */
 const applyMiddleware = function (...middlewares) {
     return function (oldCreateStore) {
-      /*生成新的 createStore*/
-      return function newCreateStore(reducer, initState) {
-        /*1. 生成store*/
-        const store = oldCreateStore(reducer, initState);
-        /*给每个 middleware 传下store，相当于 const logger = loggerMiddleware(store);*/
-        /* const chain = [exception, time, logger]*/
+      return function newCreateStore(reducer) {
+        const store = oldCreateStore(reducer);
+        // 给每个中间件注入store
         const chain = middlewares.map(middleware => middleware(store));
-        let dispatch = store.dispatch;
-        /* 实现 exception(time((logger(dispatch))))*/
-        chain.reverse().map(middleware => {
-          dispatch = middleware(dispatch);
-        });
-  
-        /*2. 重写 dispatch*/
-        store.dispatch = dispatch;
+        // 实现 exception(time((logger(dispatch))))
+        const newDispatch = chain.reverse().reduce((memo, middleware) => {
+          memo = middleware(memo);
+          return memo
+        }, store.dispatch);
+        store.dispatch = newDispatch;
         return store;
       }
     }

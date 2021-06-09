@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node index.js"
+    "test": "babel-node test.js",
+    "test1": "babel-node test-no-mdw.js"
   },
   "keywords": [],
   "author": "",

@@ -1,11 +1,17 @@
-export default function createStore(reducer, initState, rewriteCreateStoreFunc) {
+/**
+ * createStore
+ * @param {function} reducer (state, action) => newState  
+ * @param {function} rewriteCreateStoreFunc 重写createStore的方法
+ * @returns 
+ */
+export default function createStore(reducer, rewriteCreateStoreFunc) {
 
     if (rewriteCreateStoreFunc) {
       const newCreateStore = rewriteCreateStoreFunc(createStore);
-      return newCreateStore(reducer, initState);
+      return newCreateStore(reducer);
     }
   
-    let state = initState;
+    let state = {};
     let listeners = [];
   
     function subscribe(listener) {
@@ -23,7 +29,8 @@ export default function createStore(reducer, initState, rewriteCreateStoreFunc) 
     function getState() {
       return state;
     }
-  
+    
+    // 初始化state
     dispatch({ type: Symbol() });
   
     return {
