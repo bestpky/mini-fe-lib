@@ -14,6 +14,22 @@ var em = new _eventEmitter.EventEmitter();
 var currentFn;
 var obId = 1;
 
+var autorun = function autorun(fn) {
+  // currentFn = fn
+  // fn()
+  // currentFn = null
+  // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
+  var warpFn = function warpFn() {
+    currentFn = warpFn;
+    fn();
+    currentFn = null;
+  };
+
+  warpFn();
+};
+
+exports.autorun = autorun;
+
 var observable = function observable(obj) {
   // 用 Symbol 当 key；这样就不会被枚举到，仅用于值的存储；
   var data = Symbol('data');
@@ -46,16 +62,3 @@ var observable = function observable(obj) {
 };
 
 exports.observable = observable;
-
-var autorun = function autorun(fn) {
-  // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
-  var warpFn = function warpFn() {
-    currentFn = warpFn;
-    fn();
-    currentFn = null;
-  };
-
-  warpFn();
-};
-
-exports.autorun = autorun;

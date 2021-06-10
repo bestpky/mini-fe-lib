@@ -5,7 +5,8 @@
   "main": "defineProperty-version.js",
   "scripts": {
     "compile": "babel src -d lib",
-    "test": "node lib/test-mobx.js"
+    "test1": "node lib/test1.js",
+    "test2": "node lib/test2.js"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +15,9 @@
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1"
+  },
+  "dependencies": {
+    "@pky/fe-utils": "^0.1.8",
+    "core-js": "^3.14.0"
   }
 }

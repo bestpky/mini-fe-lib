@@ -1,9 +1,23 @@
-import EventEmitter from './event'
+import {EventEmitter} from '@pky/fe-utils/dist/event-emitter'
 
 // 原理：每defineProperty一个属性时全局的obId会递增
 const em = new EventEmitter()
 let currentFn
 let obId = 1
+
+const autorun = fn => {
+    // currentFn = fn
+    // fn()
+    // currentFn = null
+    // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
+    const warpFn = () => {
+        currentFn = warpFn
+        fn()
+        currentFn = null
+    }
+    warpFn()
+}
+
 const observable = obj => {
     // 用 Symbol 当 key；这样就不会被枚举到，仅用于值的存储；
     const data = Symbol('data')
@@ -34,14 +48,6 @@ const observable = obj => {
     return obj
 }
 
-const autorun = fn => {
-    // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
-    const warpFn = () => {
-        currentFn = warpFn
-        fn()
-        currentFn = null
-    }
-    warpFn()
-}
+
 
 export { autorun, observable }

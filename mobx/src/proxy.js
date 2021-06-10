@@ -1,8 +1,9 @@
-import EventEmitter from './event'
+import {EventEmitter} from '@pky/fe-utils/dist/event-emitter'
 
 const em = new EventEmitter()
 let currentFn
 let obId = 1
+const map = new WeakMap()
 
 const autorun = fn => {
     const warpFn = () => {
@@ -12,33 +13,31 @@ const autorun = fn => {
     }
     warpFn()
 }
-// 使用WeakMap是为了解决记录每个key的问题
-const map = new WeakMap()
-// 比起defineProperty好处： 不用遍历
+
 const observable = obj => {
     return new Proxy(obj, {
-        get: (target, propKey) => {
-            if (typeof target[propKey] === 'object') {
-                return observable(target[propKey])
+        get: (target, key) => {
+            if (typeof target[key] === 'object') {
+                return observable(target[key])
             } else {
                 if (currentFn) {
                     const id = String(obId++)
                     if (!map.get(target)) {
                         map.set(target, {
-                            [propKey]: id // id跟key一对一绑定
+                            [key]: id
                         })
                     }
                     em.on(id, currentFn)
                 }
-                return target[propKey]
+                return target[key]
             }
         },
-        set: (target, propKey, value) => {
-            if (target[propKey] !== value) {
-                target[propKey] = value
+        set: (target, key, value) => {
+            if (target[key] !== value) {
+                target[key] = value
                 const mapObj = map.get(target)
-                if (mapObj && mapObj[propKey]) {
-                    em.emit(mapObj[propKey])
+                if (mapObj && mapObj[key]) {
+                    em.emit(mapObj[key])
                 }
             }
             return true

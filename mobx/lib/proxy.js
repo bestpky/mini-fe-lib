@@ -16,6 +16,10 @@ var currentFn;
 var obId = 1;
 
 var autorun = function autorun(fn) {
+  // currentFn = fn
+  // fn()
+  // currentFn = null
+  // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
   var warpFn = function warpFn() {
     currentFn = warpFn;
     fn();
