@@ -4,7 +4,6 @@ import infoReducer from './reducers/info';
 
 import loggerMiddleware from './middlewares/logger';
 import exceptionMiddleware from './middlewares/exception';
-import timeMiddleware from './middlewares/time';
 
 
 const reducer = combineReducers({
@@ -13,7 +12,7 @@ const reducer = combineReducers({
 });
 
 /*接收旧的 createStore，返回新的 createStore*/
-const rewriteCreateStoreFunc = applyMiddleware(exceptionMiddleware, timeMiddleware, loggerMiddleware);
+const rewriteCreateStoreFunc = applyMiddleware(exceptionMiddleware, loggerMiddleware);
 
 /*返回了一个 dispatch 被重写过的 store*/
 const store = createStore(reducer, rewriteCreateStoreFunc);

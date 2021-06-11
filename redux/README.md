@@ -46,3 +46,8 @@ const state = {
 
 重写store的dispatch方法而已，就是在dispatch前后做一些操作
 用函数返回函数的方式传入下一个中间件和dispatch，调用下一个中间件
+
+### 异步处理
+
+redux-thunk 和 redux-promise 用法实际上比较类似，都是触发一个 function/promise 让中间件自己决定 dispatch 真正异步数据的时机，这对于大部分场景来说已经足够了。
+但是对于异步情况更复杂的场景，我们往往要写很多业务代码，一个异步结果返回后可能需要对应修改 store 里多个部分，这样就面临一个困惑的问题：业务代码是放在 action 层还是 reducer 里？
