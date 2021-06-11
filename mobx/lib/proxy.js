@@ -14,12 +14,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 var em = new _eventEmitter.EventEmitter();
 var currentFn;
 var obId = 1;
+var map = new WeakMap();
 
 var autorun = function autorun(fn) {
-  // currentFn = fn
-  // fn()
-  // currentFn = null
-  // 在 autorun 以及对可观察对象的值修改时都要需要做依赖收集
   var warpFn = function warpFn() {
     currentFn = warpFn;
     fn();
@@ -27,38 +24,36 @@ var autorun = function autorun(fn) {
   };
 
   warpFn();
-}; // 使用WeakMap是为了解决记录每个key的问题
-
+};
 
 exports.autorun = autorun;
-var map = new WeakMap(); // 比起defineProperty好处： 不用遍历
 
 var observable = function observable(obj) {
   return new Proxy(obj, {
-    get: function get(target, propKey) {
-      if (_typeof(target[propKey]) === 'object') {
-        return observable(target[propKey]);
+    get: function get(target, key) {
+      if (_typeof(target[key]) === 'object') {
+        return observable(target[key]);
       } else {
         if (currentFn) {
           var id = String(obId++);
 
           if (!map.get(target)) {
-            map.set(target, _defineProperty({}, propKey, id));
+            map.set(target, _defineProperty({}, key, id));
           }
 
           em.on(id, currentFn);
         }
 
-        return target[propKey];
+        return target[key];
       }
     },
-    set: function set(target, propKey, value) {
-      if (target[propKey] !== value) {
-        target[propKey] = value;
+    set: function set(target, key, value) {
+      if (target[key] !== value) {
+        target[key] = value;
         var mapObj = map.get(target);
 
-        if (mapObj && mapObj[propKey]) {
-          em.emit(mapObj[propKey]);
+        if (mapObj && mapObj[key]) {
+          em.emit(mapObj[key]);
         }
       }
 
