@@ -32,6 +32,7 @@ class Application extends EventEmitter {
             let next = async () => {
                 return Promise.resolve();
             };
+            // [funcA, funcB, funcC] => funcC(funcB(funcA(Promise.resolve())))
             for (let i = len - 1; i >= 0; i--) {
                 let currentMiddleware = this.middlewares[i];
                 next = createNext(currentMiddleware, next);
@@ -97,8 +98,7 @@ class Application extends EventEmitter {
         let content = ctx.body;
         if (typeof content === 'string') {
             ctx.res.end(content);
-        }
-        else if (typeof content === 'object') {
+        } else if (typeof content === 'object') {
             ctx.res.end(JSON.stringify(content));
         }
     }
