@@ -23,15 +23,12 @@ function connect(mapStateToProps = () => {},  mapDispatchToProps = () => {}) {
   // WrappedComponent就是我们使用connext包裹的自己的组件
   return function connectHOC(WrappedComponent) {
 
-    function ConnectFunction(props) {
+    return function ConnectFunction(props) {
       // 复制一份props到wrapperProps
       const { ...wrapperProps } = props;
 
-      // 获取context的值
-      const context = useContext(ReactReduxContext);
-
-      // 解构出store和parentSub
-      const { store, subscription: parentSub } = context;  
+      // 获取store的值
+      const {store} = useContext(ReactReduxContext);
 
       // 组装最终的props
       const actualChildProps = childPropsSelector(store, wrapperProps)
@@ -60,8 +57,6 @@ function connect(mapStateToProps = () => {},  mapDispatchToProps = () => {}) {
       // 渲染WrappedComponent
       return <WrappedComponent {...actualChildProps} />
     }
-
-    return ConnectFunction;
   }
 }
 

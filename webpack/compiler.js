@@ -49,25 +49,24 @@ class Compiler {
         const { entry, output } = options
         this.entry = entry
         this.output = output
-        // 模块
-        this.modules = []
     }
 
     run() {
         // 解析入口文件
         const info = this.build(this.entry)
-        this.modules.push(info)
-        this.modules.forEach(({dependecies}) => {
+        const modules = []
+        modules.push(info)
+        modules.forEach(({dependecies}) => {
             // 判断有依赖对象，递归解析所有依赖项
             if(dependecies) {
                 for(const dependency in dependecies) {
-                    this.modules.push(this.build(dependecies[dependency]))
+                    modules.push(this.build(dependecies[dependency]))
                 }
             }
         })
 
         // 生成依赖图
-        const dependencyGraph = this.modules.reduce(
+        const dependencyGraph = modules.reduce(
             (graph, item) => ({
                 ...graph,
                 // 使用文件路径作为每个模块的唯一标识符，保存对应模块的依赖对象和文件内容
@@ -78,7 +77,6 @@ class Compiler {
             }),
             {}
         )
-        console.log(dependencyGraph)
 
         this.generator(dependencyGraph)
     }
@@ -101,13 +99,19 @@ class Compiler {
     }
 
     // 重写require函数(因为浏览器无法识别commonjs语法)，输出Bundle
-    generator(code) {
+    generator(graph) {
+        try {
+            fs.statSync(this.output.path);
+        } catch(err) {
+            // 路径不存在
+            fs.mkdirSync(this.output.path)
+        }
         // 输出文件路径
         const filePath = path.join(this.output.path, this.output.filename)
-
-
         const bundle = `(function(graph){
+            //require函数的本质是执行一个模块的代码，然后将相应变量挂载到exports对象上
             function require(module){
+                //localRequire的本质是拿到依赖包的exports变量
                 function localRequire(relativePath){
                     return require(graph[module].dependecies[relativePath])
                 }
@@ -115,10 +119,11 @@ class Compiler {
                 (function(require,exports,code){
                     eval(code)
                 })(localRequire,exports,graph[module].code);
+                //函数返回指向局部变量，形成闭包，exports变量在函数执行后不会被摧毁
                 return exports;
             }
             require('${this.entry}')
-        })(${JSON.stringify(code)})`
+        })(${JSON.stringify(graph)})`
 
         // 把文件写入到文件系统
         fs.writeFileSync(filePath, bundle, 'utf-8')
